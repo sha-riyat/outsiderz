@@ -1,0 +1,21 @@
+{
+  "name": "outsiderz-station-sol",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Station sol de démonstration — inspection préventive du réseau CEET (données simulées). Équipe Outsiderz / CECFD 2026.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "leaflet": "1.9.4"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vite": "8.3.4",
+    "vitest": "5.0.4"
+  }
+}
