@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Outsiderz — Station sol · Inspection préventive du réseau HTA</title>
+    <!--
+      La feuille et le script sont produits par `npx vite build` (voir vite.config.ts).
+      La page, elle, est écrite à la main : c'est elle qui pilote la mise en page.
+    -->
+    <link rel="stylesheet" href="./assets/station.css" />
+    <script type="module" src="./assets/station.js"></script>
+  </head>
+  <body>
+    <!--
+      Station sol : la page tient entière à l'écran (pas de défilement pendant la démonstration).
+      Le panneau de droite est réglé en hauteurs relatives pour rester complet du 1366×768 au 1920×1080.
+    -->
+    <div id="app">
+      <header id="entete">
+        <a class="marque" href="./index.html" title="Retour à l'accueil de la démonstration">
+          <span class="mot-symbole">Outsiderz</span>
+        </a>
+        <span class="filet-v" aria-hidden="true"></span>
+        <h1 class="titre">Inspection préventive du réseau HTA</h1>
+        <p class="sur-titre">CECFD 2026 · ANAC Togo · catégorie « Inspection d'infrastructures »</p>
+        <p class="badge-demo">Démonstration — données simulées</p>
+      </header>
+
+      <main id="contenu">
+        <div class="vue">
+          <div id="carte"></div>
+
+          <details id="legende" open>
+            <summary>Légende</summary>
+            <ul>
+              <li><span class="pastille ligne"></span> Couloir de ligne HTA inspecté</li>
+              <li><span class="pastille trace"></span> Vol réellement parcouru</li>
+              <li><span class="pastille pylone"></span> Pylône de l'ouvrage</li>
+              <li><span class="pastille geofence"></span> Geofence — volume autorisé</li>
+              <li><span class="pastille drone"></span> Drone Outsiderz (X500 V2)</li>
+              <li><span class="pastille point-chaud"></span> Anomalie détectée</li>
+            </ul>
+          </details>
+        </div>
+
+        <aside id="panneau">
+          <section class="bloc" id="bloc-mission">
+            <h2>Télémétrie de vol</h2>
+            <div class="grille-mesures">
+              <div class="mesure mesure-double">
+                <span>Mode de vol</span><strong id="m-mode">—</strong>
+              </div>
+              <div class="mesure"><span>Cap</span><strong id="m-cap">—</strong></div>
+              <div class="mesure"><span>Vitesse</span><strong id="m-vitesse">—</strong></div>
+              <div class="mesure mesure-double">
+                <span>Étape</span><strong id="m-etape">—</strong>
+              </div>
+              <div class="mesure"><span>Altitude</span><strong id="m-altitude">—</strong></div>
+              <div class="mesure"><span>Temps</span><strong id="m-temps">—</strong></div>
+              <div class="mesure"><span>Parcouru</span><strong id="m-parcouru">—</strong></div>
+              <div class="mesure"><span>Restant</span><strong id="m-restant">—</strong></div>
+              <div class="mesure mesure-double mesure-batterie">
+                <span>Batterie 4S4P</span>
+                <strong id="m-batterie">—</strong>
+                <div class="jauge-piste"><div class="jauge-remplissage" id="jauge-batterie"></div></div>
+              </div>
+            </div>
+            <p class="note" id="m-liaison">Liaison télémétrie 915 MHz — MAVLink : nominale</p>
+          </section>
+
+          <section class="bloc" id="bloc-inspection">
+            <h2>Inspection thermique &amp; visible</h2>
+            <div id="flux-inspection" class="flux-inspection">
+              <p class="vide">En attente de la mise en route de la mission…</p>
+            </div>
+          </section>
+
+          <section class="bloc" id="bloc-rapport">
+            <h2>Rapport d'inspection</h2>
+            <div id="liste-anomalies" class="liste-anomalies">
+              <p class="vide">Aucune anomalie détectée pour l'instant.</p>
+            </div>
+            <div class="synthese">
+              <span id="synthese-texte">0 anomalie · tronçon non traité</span>
+              <button id="btn-rapport" class="bouton bouton-fantome" disabled>
+                <svg class="coche" viewBox="0 0 14 14" aria-hidden="true">
+                  <path d="M2.4 7.6 5.4 10.6 11.6 3.8" />
+                </svg>
+                <span id="libelle-rapport">Export rapport CEET</span>
+              </button>
+            </div>
+          </section>
+        </aside>
+      </main>
+
+      <footer id="pied">
+        <div class="commandes">
+          <button id="btn-play" class="bouton bouton-primaire">Lancer la mission</button>
+          <button id="btn-pause" class="bouton" disabled>Pause</button>
+          <button id="btn-reset" class="bouton">Réinitialiser</button>
+          <button id="btn-rtl" class="bouton bouton-alerte">Fail-safe RTL</button>
+        </div>
+        <div class="commandes commandes-droite">
+          <label class="bascule" for="vitesse-sim">
+            Temps ×<select id="vitesse-sim">
+              <option value="10">10</option>
+              <option value="30" selected>30</option>
+              <option value="60">60</option>
+            </select>
+          </label>
+          <label class="bascule">
+            <input type="checkbox" id="fond-osm" />
+            Fond OpenStreetMap (si réseau)
+          </label>
+        </div>
+      </footer>
+    </div>
+
+  </body>
+</html>
