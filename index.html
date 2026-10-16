@@ -1,0 +1,810 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Outsiderz — Démonstration CECFD 2026</title>
+    <meta
+      name="description"
+      content="Drone d'inspection préventive du réseau électrique CEET — équipe Outsiderz, CECFD 2026."
+    />
+    <!-- Le système de design est partagé avec la station sol et la figure : un seul fichier de jetons. -->
+    <link rel="stylesheet" href="./src/design/tokens.css" />
+    <style>
+      /* ------------------------------------------------------------------ Page */
+
+      body {
+        background: var(--fond);
+      }
+
+      .enveloppe {
+        width: min(var(--largeur-page), 100% - 48px);
+        margin: 0 auto;
+      }
+
+      /* ------------------------------------------------------------------ Barre */
+
+      .barre {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: rgba(244, 246, 249, 0.9);
+        border-bottom: 1px solid var(--filet);
+        backdrop-filter: blur(10px);
+      }
+
+      .barre .enveloppe {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        height: 62px;
+      }
+
+      .marque {
+        display: flex;
+        align-items: center;
+        flex: 0 0 auto;
+      }
+
+      .mot-symbole {
+        display: flex;
+        align-items: center;
+        font-family: var(--font-mono);
+        font-size: 13px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--encre);
+        transition: color var(--vif) var(--ease);
+      }
+
+      .marque:hover .mot-symbole {
+        color: var(--cobalt);
+      }
+
+      .mot-symbole::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        margin-right: 10px;
+        background: var(--cobalt);
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        margin-left: auto;
+      }
+
+      .nav a {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--encre-3);
+        transition: color var(--vif) var(--ease);
+      }
+
+      .nav a:hover {
+        color: var(--cobalt);
+      }
+
+      .badge {
+        flex: 0 0 auto;
+        padding: 4px 10px;
+        border: 1px solid var(--signal);
+        border-radius: 999px;
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--signal-texte);
+      }
+
+      /* ------------------------------------------------------------------ Héros */
+
+      .heros {
+        padding: clamp(56px, 11vh, 132px) 0 clamp(36px, 6vh, 72px);
+      }
+
+      .sur-titre {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--encre-3);
+      }
+
+      .sur-titre span + span::before {
+        content: '·';
+        margin-right: 10px;
+        color: var(--encre-4);
+      }
+
+      .heros h1 {
+        max-width: 21ch;
+        margin: 26px 0 0;
+        font-size: clamp(38px, 6.4vw, 84px);
+        line-height: 0.98;
+        letter-spacing: -0.035em;
+        color: var(--encre);
+        text-wrap: balance;
+      }
+
+      .heros h1 em {
+        font-style: normal;
+        color: var(--cobalt);
+      }
+
+      .chapeau {
+        max-width: 62ch;
+        margin: 28px 0 0;
+        font-size: clamp(15px, 1.15vw, 18px);
+        line-height: 1.6;
+        color: var(--encre-2);
+      }
+
+      /* Bandeau de chiffres, sous le héros : quatre valeurs, séparées par des filets. */
+      .reperes {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin: clamp(36px, 6vh, 64px) 0 0;
+        border-top: 1px solid var(--filet);
+        border-bottom: 1px solid var(--filet);
+      }
+
+      .repere {
+        padding: 18px 22px 18px 0;
+      }
+
+      .repere + .repere {
+        padding-left: 22px;
+        border-left: 1px solid var(--filet-clair);
+      }
+
+      .repere dt {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--encre-3);
+      }
+
+      .repere dd {
+        margin: 8px 0 0;
+        font-size: clamp(18px, 1.7vw, 26px);
+        letter-spacing: -0.025em;
+        color: var(--encre);
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* ------------------------------------------------------------------ Ouvrir */
+
+      .section {
+        padding: clamp(48px, 8vh, 96px) 0 0;
+      }
+
+      .tete-section {
+        display: flex;
+        align-items: baseline;
+        gap: 18px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--filet);
+      }
+
+      .tete-section h2 {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--encre-3);
+      }
+
+      .tete-section p {
+        margin-left: auto;
+        font-size: 13px;
+        color: var(--encre-3);
+      }
+
+      .ouvrir {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+        margin-top: 26px;
+      }
+
+      .carte {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 14px;
+        padding: clamp(22px, 2vw, 34px);
+        background: var(--carte);
+        border: 1px solid var(--filet);
+        border-radius: var(--r-carte);
+        transition:
+          border-color var(--pose) var(--ease),
+          transform var(--pose) var(--ease);
+      }
+
+      .carte:hover {
+        border-color: var(--cobalt);
+        transform: translateY(-2px);
+      }
+
+      .carte:active {
+        transform: translateY(0);
+      }
+
+      .carte-tete {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--encre-3);
+      }
+
+      .carte h3 {
+        font-size: clamp(20px, 1.9vw, 28px);
+        line-height: 1.12;
+        letter-spacing: -0.025em;
+        color: var(--encre);
+        text-wrap: balance;
+      }
+
+      .carte p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.6;
+        color: var(--encre-2);
+      }
+
+      .carte-pied {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-top: 16px;
+        border-top: 1px solid var(--filet-clair);
+      }
+
+      .carte-pied span {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--encre-3);
+      }
+
+      .carte-pied strong {
+        font-weight: 400;
+        color: var(--cobalt);
+      }
+
+      /* ------------------------------------------------------------------ Déroulé */
+
+      .deroule {
+        display: grid;
+        gap: 0;
+        margin-top: 26px;
+        counter-reset: beat;
+      }
+
+      .beat {
+        display: grid;
+        grid-template-columns: 64px minmax(0, 1fr) minmax(0, 62ch);
+        gap: 20px 26px;
+        padding: 22px 0;
+        border-bottom: 1px solid var(--filet-clair);
+      }
+
+      .beat:first-child {
+        border-top: 1px solid var(--filet-clair);
+      }
+
+      .beat-num {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        color: var(--encre-4);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .beat h3 {
+        font-size: clamp(17px, 1.5vw, 22px);
+        letter-spacing: -0.02em;
+        color: var(--encre);
+      }
+
+      .beat p {
+        line-height: 1.65;
+        color: var(--encre-2);
+      }
+
+      /* ------------------------------------------------------------------ Chiffres */
+
+      .chiffres {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-top: 26px;
+        border-top: 1px solid var(--filet);
+      }
+
+      .chiffre {
+        padding: 20px 24px 22px 0;
+        border-bottom: 1px solid var(--filet-clair);
+      }
+
+      .chiffre:not(:nth-child(3n + 1)) {
+        padding-left: 24px;
+        border-left: 1px solid var(--filet-clair);
+      }
+
+      .chiffre dt {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--encre-3);
+      }
+
+      .chiffre dd {
+        margin: 7px 0 0;
+        font-size: clamp(15px, 1.2vw, 18px);
+        line-height: 1.35;
+        color: var(--encre);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .chiffre dd small {
+        display: block;
+        margin-top: 3px;
+        font-size: 12.5px;
+        color: var(--encre-3);
+      }
+
+      /* ------------------------------------------------------------------ Pied */
+
+      .pied {
+        margin-top: clamp(56px, 9vh, 110px);
+        padding: 34px 0 64px;
+        border-top: 1px solid var(--filet);
+      }
+
+      .equipe {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 22px;
+        margin: 0;
+      }
+
+      .equipe dt {
+        font-size: 14px;
+        letter-spacing: -0.01em;
+        color: var(--encre);
+      }
+
+      .equipe dd {
+        margin: 6px 0 0;
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        line-height: 1.5;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--encre-3);
+      }
+
+      .mentions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 24px;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid var(--filet-clair);
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+        color: var(--encre-3);
+      }
+
+      .mentions strong {
+        font-weight: 400;
+        color: var(--signal-texte);
+      }
+
+      /* ------------------------------------------------------------------ Apparition */
+
+      /* Le héros ne bouge pas : au projecteur, le contenu est là immédiatement. */
+      .cache {
+        opacity: 0;
+      }
+
+      .cache.vu {
+        animation: poser var(--ample) var(--ease) both;
+      }
+
+      @media print {
+        .cache {
+          opacity: 1 !important;
+          animation: none !important;
+        }
+
+        .barre {
+          position: static;
+        }
+      }
+
+      /* ------------------------------------------------------------------ Adaptations */
+
+      @media (max-width: 1080px) {
+        .reperes,
+        .equipe {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .repere:nth-child(3) {
+          padding-left: 0;
+          border-left: none;
+        }
+
+        .beat {
+          grid-template-columns: 44px minmax(0, 1fr);
+        }
+
+        .beat p {
+          grid-column: 2;
+        }
+
+        .chiffres {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .chiffre:nth-child(3n + 1) {
+          padding-left: 0;
+          border-left: none;
+        }
+
+        .chiffre:nth-child(2n + 2) {
+          padding-left: 24px;
+          border-left: 1px solid var(--filet-clair);
+        }
+      }
+
+      @media (max-width: 720px) {
+        .nav {
+          display: none;
+        }
+
+        .ouvrir,
+        .chiffres,
+        .reperes,
+        .equipe {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .repere,
+        .chiffre,
+        .repere + .repere,
+        .chiffre + .chiffre {
+          padding-left: 0;
+          border-left: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="barre">
+      <div class="enveloppe">
+        <a class="marque" href="./index.html" title="Accueil de la démonstration">
+          <span class="mot-symbole">Outsiderz</span>
+        </a>
+        <nav class="nav">
+          <a href="#station">La station</a>
+          <a href="#figure">La figure</a>
+          <a href="#deroule">Le déroulé</a>
+          <a href="#chiffres">Les chiffres</a>
+        </nav>
+        <p class="badge">CECFD 2026</p>
+      </div>
+    </header>
+
+    <main class="enveloppe">
+      <section class="heros">
+        <p class="sur-titre">
+          <span>CECFD 2026</span><span>ANAC Togo</span><span>Catégorie « Inspection d'infrastructures »</span>
+        </p>
+        <h1>Ce soir, on ne montre pas un drone. On montre un <em>système</em>.</h1>
+        <p class="chapeau">
+          Inspection préventive du réseau électrique de la CEET : un quadricoptère, une caméra
+          radiométrique, une chaîne de traitement d'images et une station sol qui rend un rapport
+          directement exploitable par les équipes techniques. La démonstration est simulée de bout
+          en bout et fonctionne sans accès réseau.
+        </p>
+
+        <dl class="reperes">
+          <div class="repere">
+            <dt>Masse au décollage</dt>
+            <dd>2 800 g</dd>
+          </div>
+          <div class="repere">
+            <dt>Poussée disponible</dt>
+            <dd>5 000 g<span class="chiffre-unite"> · rapport 1,79</span></dd>
+          </div>
+          <div class="repere">
+            <dt>Autonomie</dt>
+            <dd>30–40 min<span class="chiffre-unite"> · 1 h 30 par mission</span></dd>
+          </div>
+          <div class="repere">
+            <dt>Budget du projet</dt>
+            <dd>1 771 500 F<span class="chiffre-unite"> · ≈ 2 950 USD</span></dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="section" id="station">
+        <div class="tete-section">
+          <h2>Ouvrir la démonstration</h2>
+          <p>Deux pièces, un seul serveur local. Aucune connexion requise.</p>
+        </div>
+
+        <div class="ouvrir">
+          <a class="carte" id="figure" href="./figure.html">
+            <p class="carte-tete">
+              <span>01 — La machine</span><span>Figure interactive</span>
+            </p>
+            <div>
+              <h3>Le drone pièce par pièce</h3>
+              <p>
+                Le Holybro X500 V2 en vue isométrique : structure, propulsion, avionique, énergie,
+                calcul embarqué et charge utile. 24 sous-ensembles, 241 pièces. La vue s'éclate et
+                s'annote pour suivre le propos.
+              </p>
+            </div>
+            <p class="carte-pied">
+              <span>figure.html · 2 800 g</span>
+              <strong>Ouvrir la figure →</strong>
+            </p>
+          </a>
+
+          <a class="carte" href="./station.html">
+            <p class="carte-tete">
+              <span>02 — La station sol</span><span>Démonstration hors-ligne</span>
+            </p>
+            <div>
+              <h3>Lancer une inspection</h3>
+              <p>
+                Planification du tronçon, vol automatique, détection sur les deux canaux — thermique
+                et visible — puis rapport d'inspection exportable. 8 waypoints, 5 pylônes,
+                4 anomalies simulées.
+              </p>
+            </div>
+            <p class="carte-pied">
+              <span>station.html · 2,45 km</span>
+              <strong>Ouvrir la station →</strong>
+            </p>
+          </a>
+        </div>
+      </section>
+
+      <section class="section" id="deroule">
+        <div class="tete-section">
+          <h2>Le déroulé</h2>
+          <p>Huit temps, du problème à la suite du projet.</p>
+        </div>
+
+        <div class="deroule">
+          <article class="beat">
+            <span class="beat-num">01</span>
+            <h3>Le problème</h3>
+            <p>
+              La maintenance du réseau CEET est réactive : on répare après la coupure, faute d'outil
+              de surveillance régulière. Les pertes techniques et commerciales avoisinent 16 % de
+              l'énergie distribuée. L'inspection humaine, elle, impose 7 à 18 m de distance de
+              sécurité selon la tension : elle est lente, coûteuse, et risquée pour les agents.
+            </p>
+          </article>
+
+          <article class="beat">
+            <span class="beat-num">02</span>
+            <h3>La réponse</h3>
+            <p>
+              Un drone d'inspection préventive : vol automatique le long du couloir de ligne, deux
+              canaux d'imagerie, rapport géoréférencé. Le système se lit en trois segments — aérien,
+              liaison, sol — et c'est cette chaîne complète que nous montrons, pas seulement
+              l'appareil.
+            </p>
+          </article>
+
+          <article class="beat">
+            <span class="beat-num">03</span>
+            <h3>La machine</h3>
+            <p>
+              Châssis Holybro X500 V2, empattement 500 mm. Le vol stationnaire est indispensable
+              pour observer un pylône en un point fixe : c'est ce qui écarte la voilure fixe. 2 800 g
+              au décollage pour 5 000 g de poussée disponible, soit un rapport de 1,79 — de quoi
+              tenir un vol stable dans le vent et remonter en urgence.
+            </p>
+          </article>
+
+          <article class="beat">
+            <span class="beat-num">04</span>
+            <h3>L'énergie</h3>
+            <p>
+              Batteries Li-ion 21700 en 4S4P, ≈ 16 Ah : 1 150 g, soit 41 % de la masse totale.
+              30 à 40 minutes de vol continu avec la charge utile complète ; 1 h à 1 h 30 de
+              mission en permutant quatre batteries, échange en moins de deux minutes et sans
+              outil, chargeur double canal pour tenir la rotation sur le terrain.
+            </p>
+          </article>
+
+          <article class="beat">
+            <span class="beat-num">05</span>
+            <h3>La charge utile</h3>
+            <p>
+              Une caméra thermique radiométrique FLIR Lepton 3.5 — 160 × 120, une température par
+              pixel — et une caméra RGB HD sur nacelle d'orientation : 300 g. Le Raspberry Pi 4
+              traite à bord : seuillage OpenCV sur le thermique, détection d'objets sur le visible.
+            </p>
+          </article>
+
+          <article class="beat">
+            <span class="beat-num">06</span>
+            <h3>La mission</h3>
+            <p>
+              Cinq étapes : planification des waypoints et du geofence, vol automatique,
+              géoréférencement de chaque image, traitement, restitution. Le rapport porte, pour
+              chaque anomalie, sa position GPS, son niveau de gravité et l'action recommandée.
+            </p>
+          </article>
+
+          <article class="beat">
+            <span class="beat-num">07</span>
+            <h3>La sécurité</h3>
+            <p>
+              Fail-safe : perte de liaison ou batterie basse déclenche le retour au point de départ.
+              Geofence : le vol reste confiné au volume programmé. Vol au-dessus ou à côté des
+              lignes, jamais entre les phases. Aucune intervention à proximité d'une ligne réelle
+              sous tension sans consignation coordonnée avec la CEET.
+            </p>
+          </article>
+
+          <article class="beat">
+            <span class="beat-num">08</span>
+            <h3>La suite</h3>
+            <p>
+              Composants commandés en septembre, intégration de la charge utile et de la chaîne de
+              traitement en octobre, banc de démonstration et entraînement du modèle en novembre,
+              démonstration finale début décembre. Budget 1 771 500 FCFA, variante resserrée à
+              1 481 500 FCFA.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="chiffres">
+        <div class="tete-section">
+          <h2>Les chiffres</h2>
+          <p>Tous les ordres de grandeur du dossier, en un écran.</p>
+        </div>
+
+        <dl class="chiffres">
+          <div class="chiffre">
+            <dt>Masse au décollage</dt>
+            <dd>2 800 g<small>Structure 620 · propulsion 480 · avionique 120 · énergie 1 150 · charge utile 300 · calcul 130</small></dd>
+          </div>
+          <div class="chiffre">
+            <dt>Poussée disponible</dt>
+            <dd>4 × 1 250 g = 5 000 g<small>Rapport poussée / masse 1,79 — décollage à 75 % de manette</small></dd>
+          </div>
+          <div class="chiffre">
+            <dt>Autonomie</dt>
+            <dd>30–40 min par batterie<small>1 h à 1 h 30 de mission avec quatre batteries permutées</small></dd>
+          </div>
+          <div class="chiffre">
+            <dt>Batterie</dt>
+            <dd>Li-ion 21700 4S4P<small>≈ 16 Ah · 1 150 g, soit 41 % de la masse · 237 Wh</small></dd>
+          </div>
+          <div class="chiffre">
+            <dt>Capteur thermique</dt>
+            <dd>FLIR Lepton 3.5<small>160 × 120 px, radiométrique : une température par pixel</small></dd>
+          </div>
+          <div class="chiffre">
+            <dt>Capteur visible</dt>
+            <dd>Caméra RGB HD<small>Sur nacelle d'orientation, 300 g avec le thermique</small></dd>
+          </div>
+          <div class="chiffre">
+            <dt>Contrôle de vol</dt>
+            <dd>Pixhawk 6C + GPS M10<small>ArduPilot — mode RTL natif, interrupteur de sécurité matériel</small></dd>
+          </div>
+          <div class="chiffre">
+            <dt>Liaison</dt>
+            <dd>SiK 915 MHz · ELRS 2,4 GHz<small>MAVLink pour la télémétrie, radiocommande chiffrée pour le secours</small></dd>
+          </div>
+          <div class="chiffre">
+            <dt>Calcul embarqué</dt>
+            <dd>Raspberry Pi 4 (4 Go)<small>130 g avec le câblage — seuillage thermique et détection d'objets</small></dd>
+          </div>
+          <div class="chiffre">
+            <dt>Distances de sécurité</dt>
+            <dd>7 à 18 m<small>Selon la tension de la ligne — jamais entre les phases</small></dd>
+          </div>
+          <div class="chiffre">
+            <dt>Tronçon de la démonstration</dt>
+            <dd>2,45 km · 8 waypoints<small>5 pylônes, 4 anomalies simulées, vol à 25 m d'altitude</small></dd>
+          </div>
+          <div class="chiffre">
+            <dt>Budget</dt>
+            <dd>1 771 500 FCFA<small>≈ 2 950 USD · variante resserrée 1 481 500 FCFA</small></dd>
+          </div>
+        </dl>
+      </section>
+    </main>
+
+    <footer class="pied">
+      <div class="enveloppe">
+        <dl class="equipe">
+          <div>
+            <dt>SEDJRO Koffi Jacques</dt>
+            <dd>Chef d'équipe · mécanique &amp; structure</dd>
+          </div>
+          <div>
+            <dt>AKPO GNANDI Augustin Nighen</dt>
+            <dd>Coordination &amp; documentation</dd>
+          </div>
+          <div>
+            <dt>ADJRAKOU Kodjo Ewozan Benjamin</dt>
+            <dd>Électronique &amp; alimentation</dd>
+          </div>
+          <div>
+            <dt>GANSE Sewa Shariyat Godwin</dt>
+            <dd>Logiciel &amp; traitement de données</dd>
+          </div>
+        </dl>
+        <p class="mentions">
+          <span>Équipe Outsiderz — CECFD 2026, ANAC Togo</span>
+          <span>Encadrant : AKAKPO Ablamvi Justin, expert drone</span>
+          <span><strong>Démonstration — toutes les données sont simulées</strong></span>
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      /**
+       * Apparition des blocs au défilement. Le héros et le bandeau de chiffres sont exclus : au
+       * projecteur, l'écran d'ouverture doit être complet immédiatement. Sans script, tout est là.
+       */
+      (() => {
+        const cibles = document.querySelectorAll('.section .tete-section, .ouvrir .carte, .beat, .chiffre');
+        if (!cibles.length || !('IntersectionObserver' in window)) return;
+
+        const observer = new IntersectionObserver(
+          (entrees) => {
+            for (const entree of entrees) {
+              if (!entree.isIntersecting) continue;
+              entree.target.classList.add('vu');
+              observer.unobserve(entree.target);
+            }
+          },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.05 },
+        );
+
+        let rang = 0;
+        for (const cible of cibles) {
+          // Ce qui est déjà à l'écran ne clignote pas : on ne cache que ce qui demandera un défilement.
+          if (cible.getBoundingClientRect().top < window.innerHeight * 0.92) continue;
+          cible.classList.add('cache');
+          cible.style.animationDelay = `${(rang++ % 4) * 40}ms`;
+          observer.observe(cible);
+        }
+      })();
+    </script>
+  </body>
+</html>
