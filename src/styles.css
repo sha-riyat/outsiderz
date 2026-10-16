@@ -1,0 +1,912 @@
+/**
+ * Habillage de la station sol.
+ *
+ * Le système (couleurs, échelle, mouvement) vit dans ./design/tokens.css : ce fichier ne fait que
+ * le mettre en page. Deux contraintes gouvernent tout ici :
+ *
+ *   1. La page tient ENTIÈRE à l'écran — c'est une console qu'on projette, pas un document.
+ *      Aucun défilement ne doit apparaître, du 1366×768 au 1920×1080. D'où les hauteurs et les
+ *      gouttières exprimées en `vh` : le panneau se resserre tout seul quand l'écran baisse.
+ *   2. Le papier est clair. Les filets remplacent les ombres, la couleur ne sert qu'à signifier.
+ */
+
+@import './design/tokens.css';
+
+/* ------------------------------------------------------------------ Coquille */
+
+#app {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--fond);
+}
+
+/* ------------------------------------------------------------------ En-tête */
+
+#entete {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: clamp(46px, 5.4vh, 62px);
+  padding: 0 clamp(14px, 1.4vw, 26px);
+  background: var(--carte);
+  border-bottom: 1px solid var(--filet);
+}
+
+.marque {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.mot-symbole {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--encre);
+  transition: color var(--vif) var(--ease);
+}
+
+.marque:hover .mot-symbole {
+  color: var(--cobalt);
+}
+
+.filet-v {
+  flex: 0 0 auto;
+  width: 1px;
+  height: 20px;
+  background: var(--filet-fort);
+}
+
+.titre {
+  flex: 0 0 auto;
+  font-size: clamp(13px, 1.02vw, 16px);
+  letter-spacing: var(--track-tight);
+  color: var(--encre);
+  white-space: nowrap;
+}
+
+.sur-titre {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--encre-3);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.badge-demo {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding: 4px 10px;
+  border: 1px solid var(--signal);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--signal-texte);
+}
+
+/* ------------------------------------------------------------------ Corps */
+
+#contenu {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(348px, 27vw, 442px);
+  min-height: 0;
+}
+
+.vue {
+  position: relative;
+  min-width: 0;
+  background: var(--carte);
+}
+
+#carte {
+  position: absolute;
+  inset: 0;
+  /* Fond hors-ligne : une grille de papier millimétré, alignée sur la projection Leaflet.
+     Le carroyage fin porte le détail, le carroyage cobalt marque les grands pas. */
+  background-color: #fcfdfe;
+  background-image:
+    linear-gradient(rgba(11, 18, 32, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11, 18, 32, 0.055) 1px, transparent 1px),
+    linear-gradient(rgba(31, 88, 242, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(31, 88, 242, 0.08) 1px, transparent 1px);
+  background-size: 64px 64px, 64px 64px, 320px 320px, 320px 320px;
+  z-index: 0;
+}
+
+/* ------------------------------------------------------------------ Légende */
+
+#legende {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 500;
+  max-width: 260px;
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--filet);
+  border-radius: var(--r-tag);
+  backdrop-filter: blur(6px);
+}
+
+#legende summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: var(--track-caption);
+  text-transform: uppercase;
+  color: var(--encre-3);
+  cursor: pointer;
+  list-style: none;
+}
+
+#legende summary::-webkit-details-marker {
+  display: none;
+}
+
+#legende summary::after {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-right: 1.4px solid var(--encre-3);
+  border-bottom: 1.4px solid var(--encre-3);
+  transform: rotate(45deg) translateY(-1px);
+  transition: transform var(--vif) var(--ease);
+}
+
+#legende[open] summary::after {
+  transform: rotate(225deg) translateY(-1px);
+}
+
+#legende ul {
+  display: grid;
+  gap: 5px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+#legende li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: var(--encre-2);
+}
+
+.pastille {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 10px;
+}
+
+.pastille.ligne {
+  border-top: 2px dashed #1f58f2;
+}
+
+.pastille.trace {
+  border-top: 2px solid #1f58f2;
+}
+
+.pastille.pylone {
+  width: 9px;
+  height: 9px;
+  margin: 0 3px;
+  background: #1b2430;
+  border-radius: 2px;
+}
+
+.pastille.geofence {
+  width: 13px;
+  height: 12px;
+  border: 1.5px dashed #6b7a8f;
+  border-radius: 2px;
+}
+
+.pastille.drone {
+  width: 9px;
+  height: 9px;
+  margin: 0 3px;
+  background: #0b1b33;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(31, 88, 242, 0.22);
+}
+
+.pastille.point-chaud {
+  width: 11px;
+  height: 11px;
+  border: 2px solid #c2410c;
+  border-radius: 50%;
+  background: rgba(194, 65, 12, 0.32);
+}
+
+/* ------------------------------------------------------------------ Panneau */
+
+/**
+ * Tout le panneau est réglé par ces six variables. Elles se resserrent avec la hauteur de la
+ * fenêtre : à 1080 px on respire, à 768 px les blocs se tassent au lieu de déborder.
+ */
+#panneau {
+  --g: clamp(5px, 0.95vh, 9px); /* gouttières */
+  --pad: clamp(9px, 1.3vh, 15px); /* marge intérieure d'un bloc */
+  --t-valeur: clamp(14px, 1.85vh, 19px); /* chiffres de télémétrie */
+  --t-corps: clamp(10.5px, 1.28vh, 12px); /* texte du rapport */
+  --t-meta: clamp(9.5px, 1.1vh, 10.5px); /* étiquettes, méta */
+  --t-img: clamp(24px, 3vh, 34px); /* hauteur d'une vignette d'image */
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--g);
+  min-height: 0;
+  padding: var(--g);
+  overflow: hidden;
+  background: var(--fond);
+  border-left: 1px solid var(--filet);
+}
+
+.bloc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--g);
+  padding: var(--pad);
+  background: var(--carte);
+  border: 1px solid var(--filet);
+  border-radius: var(--r-carte);
+  transition: border-color var(--pose) var(--ease);
+}
+
+/* Le rapport occupe la place restante : c'est lui qui respire quand l'écran est haut. */
+#bloc-rapport {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Fin de mission : on attire l'œil sur le livrable sans rien déplacer. */
+.bloc.atteint {
+  border-color: rgba(31, 88, 242, 0.5);
+}
+
+.bloc.atteint h2 {
+  color: var(--cobalt);
+}
+
+.bloc h2 {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: var(--track-caption);
+  text-transform: uppercase;
+  color: var(--encre-3);
+  transition: color var(--pose) var(--ease);
+}
+
+/* ------------------------------------------------------------------ Télémétrie */
+
+.grille-mesures {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--g);
+}
+
+.mesure {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 2px;
+  min-width: 0;
+  padding-top: calc(var(--g) * 0.7);
+  border-top: 1px solid var(--filet-clair);
+}
+
+.mesure > span {
+  font-family: var(--font-mono);
+  font-size: var(--t-meta);
+  line-height: 1.2;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--encre-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mesure strong {
+  font-size: var(--t-valeur);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: var(--track-titre);
+  color: var(--encre);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mesure-double {
+  grid-column: span 2;
+}
+
+/* Batterie : la valeur à droite de l'étiquette, la jauge sous les deux. */
+.mesure-batterie {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  column-gap: 8px;
+}
+
+.mesure-batterie > strong {
+  text-align: right;
+}
+
+.jauge-piste {
+  grid-column: 1 / -1;
+  height: 3px;
+  margin-top: calc(var(--g) * 0.8);
+  background: var(--rail);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.jauge-remplissage {
+  width: 0;
+  height: 100%;
+  background: var(--cobalt);
+  border-radius: 2px;
+  transition: width var(--pose) var(--ease), background-color var(--pose) var(--ease);
+}
+
+.jauge-remplissage.bas {
+  background: var(--severe);
+}
+
+/* État de la liaison : le seul témoin qui pulse, et seulement s'il y a lieu. */
+.note {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  line-height: 1.3;
+  color: var(--encre-2);
+}
+
+.note::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cobalt);
+}
+
+.note.liaison-perdue {
+  color: var(--severe);
+}
+
+.note.liaison-perdue::before {
+  background: var(--severe);
+  animation: battre 1.1s ease-in-out infinite;
+}
+
+/* ------------------------------------------------------------------ Inspection */
+
+.flux-inspection {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--g);
+}
+
+.vide {
+  display: grid;
+  place-items: center;
+  grid-column: 1 / -1;
+  min-height: calc(var(--t-img) * 2);
+  padding: 10px;
+  border: 1px dashed var(--filet);
+  border-radius: var(--r-tag);
+  font-size: 11.5px;
+  color: var(--encre-4);
+  text-align: center;
+}
+
+.vignette {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  background: var(--carte-2);
+  border: 1px solid var(--filet-clair);
+  border-radius: var(--r-tag);
+  animation: glisser var(--pose) var(--ease) both;
+}
+
+/**
+ * Les deux canaux de l'inspection sont dessinés en CSS : aucune image à charger, la démo reste
+ * hors-ligne. Le thermique est un champ sombre avec un point chaud, le visible un ciel clair avec
+ * le défaut entouré — c'est exactement ce que l'opérateur voit sur les deux fenêtres de capture.
+ */
+.img {
+  position: relative;
+  width: calc(var(--t-img) * 1.34);
+  height: var(--t-img);
+  border: 1px solid var(--filet);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.img-thermique {
+  background-color: #14161a;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 4px),
+    radial-gradient(closest-side at 50% 52%, var(--chaud) 0%, rgba(0, 0, 0, 0) 78%),
+    linear-gradient(155deg, rgba(255, 255, 255, 0.09), transparent 60%);
+}
+
+.img-visible {
+  background-image:
+    linear-gradient(168deg, #ffffff 0%, #e3e8ee 58%, #c6cfd9 100%),
+    repeating-linear-gradient(90deg, rgba(11, 18, 32, 0.05) 0 1px, transparent 1px 5px);
+}
+
+.img-visible::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 36%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 1.5px solid var(--marque);
+  border-radius: 50%;
+}
+
+.vignette-texte {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Le titre peut passer à la ligne : mieux vaut deux lignes lisibles qu'un mot tronqué. */
+.vignette-texte strong {
+  font-size: 11.5px;
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--encre);
+  overflow: hidden;
+}
+
+.meta {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--encre-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ------------------------------------------------------------------ Rapport */
+
+.liste-anomalies {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--g) * 0.55);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.liste-anomalies .vide {
+  flex: 0 0 auto;
+  min-height: 86px;
+}
+
+.ligne-anomalie {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0 4px 8px;
+  border-left: 2px solid var(--filet-fort);
+}
+
+.ligne-anomalie[data-gravite='haute'] {
+  border-left-color: var(--severe);
+}
+
+.ligne-anomalie[data-gravite='moyenne'] {
+  border-left-color: var(--modere);
+}
+
+.ligne-anomalie[data-gravite='faible'] {
+  border-left-color: var(--faible);
+}
+
+.ligne-tete {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ligne-tete strong {
+  font-size: var(--t-corps);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--encre);
+}
+
+.etiquette-gravite {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faible);
+}
+
+.ligne-anomalie[data-gravite='haute'] .etiquette-gravite {
+  color: var(--severe);
+}
+
+.ligne-anomalie[data-gravite='moyenne'] .etiquette-gravite {
+  color: var(--modere);
+}
+
+.ligne-anomalie .defaut {
+  font-size: var(--t-corps);
+  line-height: 1.24;
+  color: var(--encre-2);
+}
+
+.ligne-anomalie .action {
+  font-size: var(--t-corps);
+  line-height: 1.24;
+  color: var(--encre);
+}
+
+.ligne-anomalie .action::before {
+  content: '→ ';
+  color: var(--cobalt);
+}
+
+.synthese {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: calc(var(--g) * 0.8);
+  border-top: 1px solid var(--filet-clair);
+}
+
+.synthese > span {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--encre-2);
+}
+
+/* ------------------------------------------------------------------ Boutons */
+
+.bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 14px;
+  background: transparent;
+  border: 1px solid var(--filet-fort);
+  border-radius: 7px;
+  color: var(--encre);
+  font-size: 12.5px;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    border-color var(--vif) var(--ease),
+    color var(--vif) var(--ease),
+    background-color var(--vif) var(--ease),
+    transform var(--vif) var(--ease);
+}
+
+.bouton:hover:not(:disabled) {
+  border-color: var(--encre-3);
+  background: var(--carte-2);
+}
+
+.bouton:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.bouton:disabled {
+  border-color: var(--filet-clair);
+  color: var(--encre-4);
+  cursor: not-allowed;
+}
+
+/* Jamais de bouton plein : la couleur tient le rôle, pas l'aplat. */
+.bouton-primaire {
+  border-color: var(--cobalt);
+  color: var(--cobalt);
+}
+
+.bouton-primaire:hover:not(:disabled) {
+  background: rgba(31, 88, 242, 0.07);
+}
+
+.bouton-alerte {
+  border-color: var(--signal);
+  color: var(--signal-texte);
+}
+
+.bouton-alerte:hover:not(:disabled) {
+  border-color: var(--signal);
+  background: rgba(255, 65, 5, 0.07);
+}
+
+.bouton-fantome {
+  height: 28px;
+  padding: 0 11px;
+  font-size: 11.5px;
+  border-color: var(--cobalt);
+  color: var(--cobalt);
+}
+
+.bouton-fantome:hover:not(:disabled) {
+  background: rgba(31, 88, 242, 0.07);
+}
+
+/* La coche se dessine au moment de l'export, puis s'efface. */
+.coche {
+  --longueur: 24;
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: var(--longueur);
+  stroke-dashoffset: var(--longueur);
+}
+
+.bouton.exporte .coche {
+  animation: tracer var(--pose) var(--ease) both;
+}
+
+/* ------------------------------------------------------------------ Pied */
+
+#pied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: clamp(42px, 5.4vh, 60px);
+  padding: 0 clamp(12px, 1.4vw, 24px);
+  background: var(--carte);
+  border-top: 1px solid var(--filet);
+}
+
+.commandes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.commandes-droite {
+  gap: 16px;
+}
+
+.bascule {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--encre-3);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.bascule select {
+  height: 26px;
+  padding: 0 6px;
+  background: var(--carte);
+  border: 1px solid var(--filet-fort);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--encre);
+  cursor: pointer;
+}
+
+.bascule input[type='checkbox'] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--cobalt);
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------------------ Leaflet */
+
+.leaflet-container {
+  background: transparent;
+  font-family: var(--font-display);
+  font-size: 12px;
+}
+
+.leaflet-control-zoom {
+  border: 1px solid var(--filet);
+  border-radius: var(--r-tag);
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.leaflet-control-zoom a {
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom-color: var(--filet-clair);
+  color: var(--encre);
+  font-family: var(--font-mono);
+  font-size: 16px;
+}
+
+.leaflet-control-zoom a:hover {
+  background: var(--carte-2);
+  color: var(--cobalt);
+}
+
+.leaflet-tooltip {
+  padding: 5px 8px;
+  background: var(--carte);
+  border: 1px solid var(--filet-fort);
+  border-radius: 6px;
+  color: var(--encre);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  box-shadow: none;
+}
+
+.leaflet-tooltip-top::before {
+  border-top-color: var(--filet-fort);
+}
+
+.leaflet-tooltip-bottom::before {
+  border-bottom-color: var(--filet-fort);
+}
+
+.leaflet-tooltip-left::before {
+  border-left-color: var(--filet-fort);
+}
+
+.leaflet-tooltip-right::before {
+  border-right-color: var(--filet-fort);
+}
+
+.leaflet-tooltip strong {
+  font-weight: 400;
+  color: var(--cobalt);
+}
+
+.leaflet-control-attribution {
+  padding: 1px 6px;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--encre-3);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  border-top-left-radius: 6px;
+}
+
+.leaflet-control-attribution a {
+  color: var(--encre-2);
+}
+
+.icone-drone,
+.icone-pylone {
+  background: none;
+  border: none;
+}
+
+/* Le pylône : une étiquette d'ouvrage, lisible sur le papier comme sur les tuiles. */
+.pylone-corps {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--encre);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  color: var(--encre);
+}
+
+.anomalie-carte {
+  filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0));
+}
+
+/* ------------------------------------------------------------------ Adaptations */
+
+/* Écrans étroits : on sacrifie la mention de contexte, jamais la télémétrie. */
+@media (max-width: 1180px) {
+  #contenu {
+    grid-template-columns: minmax(0, 1fr) clamp(320px, 32vw, 380px);
+  }
+
+  .sur-titre {
+    display: none;
+  }
+}
+
+/* Trop étroit pour deux colonnes : la console passe en pile et redevient défilable. */
+@media (max-width: 700px) {
+  #app {
+    height: auto;
+    overflow: visible;
+  }
+
+  #contenu {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(300px, 46vh) auto;
+  }
+
+  #carte {
+    position: relative;
+    inset: auto;
+    height: 100%;
+  }
+
+  #panneau {
+    overflow: visible;
+    border-left: none;
+    border-top: 1px solid var(--filet);
+  }
+
+  .bloc h2 {
+    font-size: 10px;
+  }
+}
+
+/* Écran très bas : plutôt que de rogner le rapport, on autorise le défilement du seul panneau. */
+@media (max-height: 700px) and (min-width: 701px) {
+  #panneau {
+    overflow-y: auto;
+  }
+}
+
+@media print {
+  #app {
+    height: auto;
+    overflow: visible;
+  }
+
+  #pied,
+  #carte {
+    display: none;
+  }
+}

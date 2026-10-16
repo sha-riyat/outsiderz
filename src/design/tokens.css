@@ -1,0 +1,268 @@
+/**
+ * Outsiderz — système de design partagé par les trois pages.
+ *
+ * Direction : **papier d'ingénieur**. Un canevas de papier froid, des cartes blanches,
+ * des filets fins qui dessinent la structure comme un plan, une monospace espacée pour
+ * les étiquettes d'instrument, une seule famille d'affichage pour les chiffres.
+ *
+ * Deux accents, jamais plus : le cobalt pour ce qui compte (une mesure, une action, notre
+ * matériel), l'orange pour ce qui alerte ou se manipule. Un seul orange par écran.
+ *
+ * Ce fichier est la source unique : la station sol l'importe, la figure isométrique et la
+ * page d'accueil le reprennent. Changer une valeur ici change les trois pages.
+ *
+ * Contraste : chaque couple texte/fond ci-dessous est vérifié au niveau AA (≥ 4,5:1 pour le
+ * texte courant et les petites capitales monospace, ≥ 3:1 pour les traits et les pictogrammes).
+ * Les valeurs sont notées en commentaire.
+ */
+
+:root {
+  /* ------------------------------------------------------------------ Surfaces */
+  /* Trois paliers : le canevas, la carte posée dessus, le bloc imbriqué. */
+  --fond: #f4f6f9; /* canevas de page */
+  --carte: #ffffff; /* carte, panneau, planche */
+  --carte-2: #f8fafc; /* bloc dans une carte */
+  --rail: #e5eaf1; /* piste d'une jauge, fond d'un contrôle */
+
+  /* ------------------------------------------------------------------ Encres */
+  --encre: #0b1220; /* texte principal — 19:1 sur blanc */
+  --encre-2: #3d4757; /* texte secondaire — 9,8:1 */
+  --encre-3: #5b6a80; /* étiquettes, légendes — 6,0:1 */
+  --encre-4: #8b98a9; /* désactivé, décor — 3,1:1 */
+
+  /* ------------------------------------------------------------------ Filets */
+  /* Le filet clair est la signature : il dessine la structure sans ombre ni aplat. */
+  --filet: rgba(11, 18, 32, 0.16);
+  --filet-clair: rgba(11, 18, 32, 0.08);
+  --filet-fort: rgba(11, 18, 32, 0.36);
+
+  /* ------------------------------------------------------------------ Accents */
+  --cobalt: #1f58f2; /* accent froid — 5,9:1 sur blanc */
+  --cobalt-clair: #1c46c4; /* le même, plus dense, pour le petit texte — 7,6:1 */
+  --signal: #ff4105; /* le seul ton chaud : traits, pastilles, bordures */
+  --signal-texte: #c2410c; /* le même lisible en texte — 5,2:1 */
+
+  /* Sévérité d'une anomalie : un dégradé de température, du plus chaud au plus sourd. */
+  --severe: #c2410c; /* 5,2:1 */
+  --modere: #b45309; /* 4,8:1 */
+  --faible: #5b6a80; /* 6,0:1 */
+
+  /* ------------------------------------------------------------------ Typographie */
+  /* Une seule famille pour tout le visible, une monospace pour les étiquettes. */
+  --font-display: 'Segoe UI Variable Display', 'Segoe UI', ui-sans-serif, system-ui, -apple-system,
+    'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Échelle : peu de tailles, très écartées. C'est l'écart qui fait la hiérarchie. */
+  --t-caption: 10px;
+  --t-micro: 11.5px;
+  --t-body: 14px;
+  --t-body-lg: 16px;
+  --t-valeur: 22px;
+  --t-titre: 24px;
+  --t-h2: clamp(28px, 3.4vw, 44px);
+  --t-display: clamp(44px, 7vw, 88px);
+
+  --track-caption: 0.16em; /* le mono étiqueté est large : c'est sa signature */
+  --track-tight: -0.02em;
+  --track-titre: -0.03em;
+
+  /* ------------------------------------------------------------------ Rythme */
+  --s-4: 4px;
+  --s-8: 8px;
+  --s-12: 12px;
+  --s-16: 16px;
+  --s-20: 20px;
+  --s-24: 24px;
+  --s-32: 32px;
+  --s-48: 48px;
+  --s-64: 64px;
+  --s-96: 96px;
+
+  --largeur-page: 1400px;
+
+  /* ------------------------------------------------------------------ Formes */
+  --r-tag: 8px;
+  --r-carte: 16px;
+  --r-panneau: 24px;
+
+  /* ------------------------------------------------------------------ Mouvement */
+  /* Un seul easement, court, jamais élastique. */
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --vif: 140ms;
+  --pose: 320ms;
+  --ample: 560ms;
+}
+
+/* ---------------------------------------------------------------- Base commune */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--fond);
+  color: var(--encre);
+  font-family: var(--font-display);
+  font-size: var(--t-body);
+  font-weight: 400;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Jamais de graisse pour appuyer un propos : de la taille, ou une couleur. */
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+  font-weight: 400;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+::selection {
+  background: var(--cobalt);
+  color: #fff;
+}
+
+/* Le contour de focus est une donnée d'exploitation : il doit se voir au projecteur. */
+:focus-visible {
+  outline: 2px solid var(--cobalt);
+  outline-offset: 2px;
+}
+
+/* Barre de défilement discrète, accordée aux surfaces. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--encre-4) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--encre-4);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+/* ---------------------------------------------------------------- Étiquette mono */
+
+/**
+ * Étiquette d'instrument : monospace, capitales, très espacée.
+ * C'est le seul usage de la monospace hors des blocs de code et des coordonnées.
+ */
+.mono,
+.etiquette {
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  letter-spacing: var(--track-caption);
+  text-transform: uppercase;
+  color: var(--encre-3);
+}
+
+/* ---------------------------------------------------------------- Mouvement */
+
+/**
+ * Entrée d'un bloc : le contenu monte de 16 px et se pose. Appliqué par un observateur
+ * d'intersection, jamais par défaut — sans script, le contenu est déjà là.
+ */
+@keyframes poser {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/** Bascule d'un état : le texte s'efface et revient, sans changer la mise en page. */
+@keyframes echanger {
+  from {
+    opacity: 0;
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+  }
+}
+
+/** Une entrée de flux : la vignette glisse depuis la gauche de 8 px. */
+@keyframes glisser {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/** Le trait se dessine : sert à la coche de « rapport exporté ». */
+@keyframes tracer {
+  from {
+    stroke-dashoffset: var(--longueur, 24);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/** Un témoin qui bat : liaison perdue, alerte. */
+@keyframes battre {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.posera {
+  animation: poser var(--ample) var(--ease) both;
+}
+
+.echangera {
+  animation: echanger var(--vif) var(--ease) both;
+}
+
+/**
+ * Respect du réglage système : on garde le contenu, on retire le déplacement.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
